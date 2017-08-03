@@ -1,0 +1,24 @@
+{
+    parserClass = "com.quokka_script.parser.QuokkaScriptParser"
+  parserUtilClass="com.quokka_script.parser.QuokkaScriptParserUtil"
+    extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+
+    psiClassPrefix = "Quokka"
+    psiImplClassSuffix = "Impl"
+
+    psiPackage = "com.quokka_script.psi"
+    psiImplPackage = "com.quokka_script.psi.impl"
+
+    elementTypeHolderClass = "com.quokka_script.QuokkaTypes"
+    elementTypeClass="com.quokka_script.psi.QuokkaElementType"
+    tokenTypeClass="com.quokka_script.psi.QuokkaTokenType"
+
+    tokens = [
+        propName = "regexp:.*"
+    ]
+
+}
+
+rootFile ::= !<<eof>> &mainObject
+
+mainObject ::= 'def Page main'
