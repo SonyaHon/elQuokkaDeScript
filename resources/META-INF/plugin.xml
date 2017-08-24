@@ -27,6 +27,12 @@
   <extensions defaultExtensionNs="com.intellij">
     <!-- Add your extensions here -->
     <fileTypeFactory implementation="com.quokka_script.QuokkaFileTypeFactory"/>
+    <lang.parserDefinition language="Quokka Script" implementationClass="com.quokka_script.QuokkaParserDefinition"/>
+    <lang.syntaxHighlighterFactory language="Quokka Script" implementationClass="com.quokka_script.QuokkaSyntaxHighlighterFactory"/>
+    <colorSettingsPage implementation="com.quokka_script.QuokkaColorSettingsPage"/>-->
+    <codeStyleSettingsProvider implementation="com.quokka_script.QuokkaCodeStyleSettingsProvider"/>
+    <langCodeStyleSettingsProvider implementation="com.quokka_script.QuokkaLanguageCodeStyleSettingsProvider"/>
+
   </extensions>
 
   <actions>

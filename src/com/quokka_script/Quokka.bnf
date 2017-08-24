@@ -1,6 +1,6 @@
 {
     parserClass = "com.quokka_script.parser.QuokkaScriptParser"
-  parserUtilClass="com.quokka_script.parser.QuokkaScriptParserUtil"
+    parserUtilClass="com.quokka_script.parser.QuokkaScriptParserUtil"
     extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
 
     psiClassPrefix = "Quokka"
@@ -12,15 +12,38 @@
     elementTypeHolderClass = "com.quokka_script.QuokkaTypes"
     elementTypeClass="com.quokka_script.psi.QuokkaElementType"
     tokenTypeClass="com.quokka_script.psi.QuokkaTokenType"
-
-    tokens = [
-        propName = "regexp:.*"
-    ]
-
 }
 
-rootFile ::= !<<eof>> firstLayerComponent
+rootFile ::= (GLOBAL_OBJECT | META_INFO | COMMENT)*
 
-firstLayerComponent ::= "def " Type Name
-Type ::= <<string>>
-Name ::= <<string>>
+private close_rule ::= DEDENT | <<eof>>
+
+FULL_COMMENT ::= COMMENT_BEGIN COMMENT_SYMBOL* COMMENT_END close_rule?
+COMMENT ::= (LINE_COMMENT close_rule?) | (FULL_COMMENT)
+
+META_INFO ::= META COLON VAL? [INDENT VAL*] close_rule?
+
+GLOBAL_OBJECT ::= DEFINE COMPONENT IDENTIFIER [COMMENT+] [INDENT INN*]  close_rule?
+
+private INN ::=  QS_OBJECT | METHOD | COMMENT
+
+QS_OBJECT ::= KEYWORD? COMPONENT [IDENTIFIER] [COLON VALUE?] [INDENT INN*] close_rule?
+
+METHOD ::= METHOD_NAME COLON ROUND_BRACE_OPENED (ARGUMENT (COMMA ARGUMENT)*)? ROUND_BRACE_CLOSED ARROW_RIGHT FUNCTION close_rule?
+FUNCTION ::= FULL_FUNCTION |  FUNC_LINE? INDENT (FUNC_LINE)+
+
+VALUE ::= VAL | STRING | json | REACTIVE_LINK | HEX_DIGIT
+REACTIVE_LINK ::= REACTIVE_BRACKET_OPENED IDENTIFIER* REACTIVE_BRACKET_CLOSED
+
+private json ::= jsArray | jsObject
+
+jsArray ::= BRACKET1O [!BRACKET1C arItem (!BRACKET1C COMMA arItem) *] BRACKET1C {pin(".*")=1}
+
+jsObject ::= BRACKET2O [!BRACKET2C obItem (!BRACKET2C COMMA? obItem) *] BRACKET2C {pin(".*")=1}
+
+arItem ::= json | jsonValue {recoverWhile=jsonRecoverRule}
+obItem ::= obName COLON jsonValue {pin=1 recoverWhile=jsonRecoverRule}
+obName ::= STRING | IDENTIFIER
+jsonValue ::= DIGIT | STRING | json | REACTIVE_LINK
+
+private jsonRecoverRule ::= !(COMMA | BRACKET1C | BRACKET2C | BRACKET1O | BRACKET2O)
