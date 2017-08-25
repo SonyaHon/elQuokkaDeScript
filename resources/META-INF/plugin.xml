@@ -30,9 +30,9 @@
     <lang.parserDefinition language="Quokka Script" implementationClass="com.quokka_script.QuokkaParserDefinition"/>
     <!--  <lang.syntaxHighlighterFactory language="Quokka Script" implementationClass="com.quokka_script.QuokkaSyntaxHighlighterFactory"/>
      <colorSettingsPage implementation="com.quokka_script.QuokkaColorSettingsPage"/>
-     -->
     <codeStyleSettingsProvider implementation="com.quokka_script.QuokkaCodeStyleSettingsProvider"/>
-    <langCodeStyleSettingsProvider implementation="com.quokka_script.QuokkaLanguageCodeStyleSettingsProvider"/>
+     <langCodeStyleSettingsProvider implementation="com.quokka_script.QuokkaLanguageCodeStyleSettingsProvider"/> -->
+    <lang.formatter language="Quokka Script" implementationClass="com.quokka_script.QuokkaFormatingModelBuilder" />
 
   </extensions>
 

@@ -28,14 +28,8 @@ public class QuokkaBlock extends AbstractBlock {
 		ASTNode child = myNode.getFirstChildNode();
 		while (child != null) {
 			if( child.getElementType() != TokenType.WHITE_SPACE) {
-				if(child.getElementType() != QuokkaTypes.COMMENT) {
-					Block block = new QuokkaBlock(child, Wrap.createWrap(WrapType.NONE, false), Alignment.createAlignment(), spacingBuilder);
-					blocks.add(block);
-				}
-				else {
-					Block block = new QuokkaBlock(child, Wrap.createWrap(WrapType.CHOP_DOWN_IF_LONG, false), Alignment.createAlignment(), spacingBuilder);
-					blocks.add(block);
-				}
+				Block block = new QuokkaBlock(child, Wrap.createWrap(WrapType.NONE, false), Alignment.createAlignment(), spacingBuilder);
+				blocks.add(block);
 			}
 			child = child.getTreeNext();
 		}
@@ -45,7 +39,22 @@ public class QuokkaBlock extends AbstractBlock {
 	@Nullable
 	@Override
 	public Spacing getSpacing(@Nullable Block child1, @NotNull Block child2) {
+		if(child1 == null) return Spacing.getReadOnlySpacing();
 		return spacingBuilder.getSpacing(this, child1, child2);
+	}
+
+	@Nullable
+	@Override
+	public Indent getIndent() {
+		if(myNode.getElementType() == QuokkaTypes.GLOBAL_OBJECT) {
+			return Indent.getSpaceIndent(0);
+		}
+		else if(myNode.getElementType() == QuokkaTypes.META_INFO) {
+			return Indent.getSpaceIndent(0);
+		}
+		else {
+			return Indent.getNormalIndent(true);
+		}
 	}
 
 	@Override

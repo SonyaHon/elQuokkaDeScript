@@ -25,12 +25,19 @@ public class QuokkaFormatingModelBuilder implements FormattingModelBuilder {
 
 	private static SpacingBuilder createSpaceBuilder(CodeStyleSettings settings) {
 		return new SpacingBuilder(settings, QuokkaScript.INSTANCE)
-				.before(QuokkaTypes.DEFINE).none()
+				.before(QuokkaTypes.GLOBAL_OBJECT).none()
 				.before(QuokkaTypes.META_INFO).none()
-				.between(QuokkaTypes.DEFINE, QuokkaTypes.COMPONENT).spaces(1)
-				.between(QuokkaTypes.COMPONENT, QuokkaTypes.IDENTIFIER).spaces(1)
-				.between(QuokkaTypes.COMPONENT, QuokkaTypes.COLON).none()
-				.between(QuokkaTypes.COLON, QuokkaTypes.VALUE).spacing(0, 10, 1, false, 0);
+				.after(QuokkaTypes.GLOBAL_OBJECT).lineBreakOrForceSpace(true, false)
+				.afterInside(QuokkaTypes.IDENTIFIER, QuokkaTypes.GLOBAL_OBJECT).lineBreakOrForceSpace(true, false)
+				.beforeInside(QuokkaTypes.QS_OBJECT, QuokkaTypes.GLOBAL_OBJECT).parentDependentLFSpacing(1, 1, true, 1)
+				.afterInside(QuokkaTypes.QS_OBJECT, QuokkaTypes.GLOBAL_OBJECT).lineBreakOrForceSpace(true, false)
+				.beforeInside(QuokkaTypes.QS_OBJECT, QuokkaTypes.QS_OBJECT).parentDependentLFSpacing(1, 1, true ,1)
+				.afterInside(QuokkaTypes.QS_OBJECT, QuokkaTypes.QS_OBJECT).lineBreakInCode()
+				.after(QuokkaTypes.COLON).spacing(0, 1, 0, false, 0)
+				.before(QuokkaTypes.DEDENT).none()
+				.before(QuokkaTypes.INDENT).none()
+				.after(QuokkaTypes.DEDENT).none()
+				.after(QuokkaTypes.INDENT).none();
 	}
 
 	@Nullable

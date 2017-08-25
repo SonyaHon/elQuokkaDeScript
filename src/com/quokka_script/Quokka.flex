@@ -177,8 +177,10 @@ prop_name = [a-z][a-zA-Z]+:
                                                  return QuokkaTypes.DEDENT;
                                              }
                                              else {
-                                                 yybegin(YYINITIAL);
+                                                 yybegin(normal);
                                                  wasLastTokenMethod = false;
+                                                 indent_to_close = 0;
+                                                 firstTouch = false;
                                                  return TokenType.WHITE_SPACE;
                                              }
                                         }
