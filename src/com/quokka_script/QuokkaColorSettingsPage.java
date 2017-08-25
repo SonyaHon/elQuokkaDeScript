@@ -1,12 +1,10 @@
 package com.quokka_script;
 
-import b.a.S;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.openapi.fileTypes.SyntaxHighlighter;
 import com.intellij.openapi.options.colors.AttributesDescriptor;
 import com.intellij.openapi.options.colors.ColorDescriptor;
 import com.intellij.openapi.options.colors.ColorSettingsPage;
-import com.intellij.openapi.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,7 +17,16 @@ import java.util.Map;
 public class QuokkaColorSettingsPage implements ColorSettingsPage {
 
     private static final AttributesDescriptor[] DESCRIPTORS = new AttributesDescriptor[] {
-
+            new AttributesDescriptor("Keywords", QuokkaSyntaxHighlighter.KEYWORD),
+            new AttributesDescriptor("Strings and Values", QuokkaSyntaxHighlighter.STRING),
+            new AttributesDescriptor("Numbers", QuokkaSyntaxHighlighter.NUMBER),
+            new AttributesDescriptor("Components and properties", QuokkaSyntaxHighlighter.CLASS),
+            new AttributesDescriptor("Separators", QuokkaSyntaxHighlighter.SEPARATOR),
+            new AttributesDescriptor("Braces", QuokkaSyntaxHighlighter.BRACE),
+            new AttributesDescriptor("Methods", QuokkaSyntaxHighlighter.METHOD),
+            new AttributesDescriptor("Metadata", QuokkaSyntaxHighlighter.META),
+            new AttributesDescriptor("Reactive link", QuokkaSyntaxHighlighter.REACTIVE),
+            new AttributesDescriptor("Identifiers", QuokkaSyntaxHighlighter.IDENTIFIER)
     };
 
 
@@ -39,9 +46,13 @@ public class QuokkaColorSettingsPage implements ColorSettingsPage {
     @Override
     public String getDemoText() {
         return  "// Comment\n"+
+                "@metadata: \"Эстонский флаг\"\n"+
                 "def Page main\n"+
-                " background: #333\n"+
-                " public Label s1: \"Hello World!\"";
+                "   background: #333\n"+
+                "   public Label s1: \"Hello World!\" \n" +
+                "   Button b1: {{ s1 }}\n"+
+                "       .click: () -> \n" +
+                "           console.log(\"Hello World!\")";
     }
 
     @Nullable
@@ -59,7 +70,7 @@ public class QuokkaColorSettingsPage implements ColorSettingsPage {
     @NotNull
     @Override
     public ColorDescriptor[] getColorDescriptors() {
-        return new ColorDescriptor[0];
+        return ColorDescriptor.EMPTY_ARRAY;
     }
 
     @NotNull

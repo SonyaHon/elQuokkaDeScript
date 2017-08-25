@@ -7,4 +7,13 @@ import com.intellij.psi.PsiElement;
 
 public interface QuokkaGlobalObject extends PsiElement {
 
+  @NotNull
+  List<QuokkaComment> getCommentList();
+
+  @NotNull
+  List<QuokkaMethod> getMethodList();
+
+  @NotNull
+  List<QuokkaQsObject> getQsObjectList();
+
 }

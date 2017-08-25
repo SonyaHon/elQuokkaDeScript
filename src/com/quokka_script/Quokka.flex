@@ -81,14 +81,14 @@ prop_name = [a-z][a-zA-Z]+:
 
 <YYINITIAL> {
     " "                         {
-                                    yybegin(YYINITIAL); current_line_indent += 1; return TokenType.WHITE_SPACE;
+                                    yybegin(YYINITIAL); current_line_indent += 1;
 
                                 }
     \t                          {
-                                    yybegin(YYINITIAL); current_line_indent = (current_line_indent + tab_size) & ~(tab_size - 1); return TokenType.WHITE_SPACE;
+                                    yybegin(YYINITIAL); current_line_indent = (current_line_indent + tab_size) & ~(tab_size - 1);
                                 }
     "/*"                        { yybegin(comment); return QuokkaTypes.COMMENT_BEGIN; }
-    .                           {
+    [^\n\t ]                    {
                                     if(wasLastTokenMeta) {
                                         if(wrappers.peek() == 0 && current_line_indent == 0){
                                             yypushback(1);
@@ -163,7 +163,6 @@ prop_name = [a-z][a-zA-Z]+:
                                     }
                                 }
     \n                          { current_line_indent = 0; yybegin(YYINITIAL); return TokenType.WHITE_SPACE; }
-    //<<EOF>>                   { yybegin(returnDedents); }
 }
 
 <returnDedents> {
@@ -178,7 +177,7 @@ prop_name = [a-z][a-zA-Z]+:
                                                  return QuokkaTypes.DEDENT;
                                              }
                                              else {
-                                                 yybegin(normal);
+                                                 yybegin(YYINITIAL);
                                                  wasLastTokenMethod = false;
                                                  return TokenType.WHITE_SPACE;
                                              }
@@ -271,7 +270,7 @@ prop_name = [a-z][a-zA-Z]+:
                                 }
     "/*"                        { yybegin(comment); return QuokkaTypes.COMMENT_BEGIN; }
     {metadata}                  { wasLastTokenMeta = true; yybegin(normal); return QuokkaTypes.META; }
-    {identifier}                { yybegin(normal); wasLastTokenComponent = false; return QuokkaTypes.IDENTIFIER; }
+    {identifier}                { if(wasLastTokenComponent) { yybegin(normal); wasLastTokenComponent = false; return QuokkaTypes.IDENTIFIER; } }
     {method}                    { yybegin(normal); wasLastTokenMethod = true; return QuokkaTypes.METHOD_NAME; }
     [^]                         { yybegin(normal); return TokenType.BAD_CHARACTER; }
 

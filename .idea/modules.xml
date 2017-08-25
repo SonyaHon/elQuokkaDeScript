@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/QSPlugin.iml" filepath="$PROJECT_DIR$/QSPlugin.iml" />
+      <module fileurl="file://$PROJECT_DIR$/elQuokkaDeScript.iml" filepath="$PROJECT_DIR$/elQuokkaDeScript.iml" />
     </modules>
   </component>
 </project>

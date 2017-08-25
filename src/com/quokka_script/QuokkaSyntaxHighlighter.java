@@ -20,7 +20,7 @@ public class QuokkaSyntaxHighlighter extends SyntaxHighlighterBase {
     public static final TextAttributesKey SEPARATOR = TextAttributesKey.createTextAttributesKey("Q_SEPP", DefaultLanguageHighlighterColors.OPERATION_SIGN);
     public static final TextAttributesKey BRACE = TextAttributesKey.createTextAttributesKey("Q_BRACE", DefaultLanguageHighlighterColors.BRACES);
     public static final TextAttributesKey METHOD = TextAttributesKey.createTextAttributesKey("Q_METHOD", DefaultLanguageHighlighterColors.STATIC_METHOD);
-    public static final TextAttributesKey META = TextAttributesKey.createTextAttributesKey("Q_META", DefaultLanguageHighlighterColors.METADATA);
+    public static final TextAttributesKey META = TextAttributesKey.createTextAttributesKey("Q_META", DefaultLanguageHighlighterColors.LABEL);
     public static final TextAttributesKey REACTIVE = TextAttributesKey.createTextAttributesKey("Q_META", DefaultLanguageHighlighterColors.BRACKETS);
     public static final TextAttributesKey IDENTIFIER = TextAttributesKey.createTextAttributesKey("Q_META", DefaultLanguageHighlighterColors.IDENTIFIER);
 

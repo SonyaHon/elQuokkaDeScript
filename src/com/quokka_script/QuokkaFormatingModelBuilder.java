@@ -6,6 +6,7 @@ import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.codeStyle.CodeStyleSettings;
+import com.sun.org.apache.xpath.internal.operations.Quo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,8 +24,13 @@ public class QuokkaFormatingModelBuilder implements FormattingModelBuilder {
 	}
 
 	private static SpacingBuilder createSpaceBuilder(CodeStyleSettings settings) {
-		return new SpacingBuilder(settings, QuokkaScript.INSTANCE).
-						around(QuokkaTypes.COLON).spaceIf(settings.SPACE_AROUND_ASSIGNMENT_OPERATORS).before(QuokkaTypes.IDENTIFIER).none();
+		return new SpacingBuilder(settings, QuokkaScript.INSTANCE)
+				.before(QuokkaTypes.DEFINE).none()
+				.before(QuokkaTypes.META_INFO).none()
+				.between(QuokkaTypes.DEFINE, QuokkaTypes.COMPONENT).spaces(1)
+				.between(QuokkaTypes.COMPONENT, QuokkaTypes.IDENTIFIER).spaces(1)
+				.between(QuokkaTypes.COMPONENT, QuokkaTypes.COLON).none()
+				.between(QuokkaTypes.COLON, QuokkaTypes.VALUE).spacing(0, 10, 1, false, 0);
 	}
 
 	@Nullable

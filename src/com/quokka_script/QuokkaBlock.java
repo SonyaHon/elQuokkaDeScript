@@ -4,6 +4,7 @@ import com.intellij.formatting.*;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.TokenType;
 import com.intellij.psi.formatter.common.AbstractBlock;
+import com.quokka_script.psi.QuokkaTokenType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -27,8 +28,14 @@ public class QuokkaBlock extends AbstractBlock {
 		ASTNode child = myNode.getFirstChildNode();
 		while (child != null) {
 			if( child.getElementType() != TokenType.WHITE_SPACE) {
-				Block block = new QuokkaBlock(child, Wrap.createWrap(WrapType.NONE, false), Alignment.createAlignment(), spacingBuilder);
-				blocks.add(block);
+				if(child.getElementType() != QuokkaTypes.COMMENT) {
+					Block block = new QuokkaBlock(child, Wrap.createWrap(WrapType.NONE, false), Alignment.createAlignment(), spacingBuilder);
+					blocks.add(block);
+				}
+				else {
+					Block block = new QuokkaBlock(child, Wrap.createWrap(WrapType.CHOP_DOWN_IF_LONG, false), Alignment.createAlignment(), spacingBuilder);
+					blocks.add(block);
+				}
 			}
 			child = child.getTreeNext();
 		}
