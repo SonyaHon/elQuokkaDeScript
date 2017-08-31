@@ -29,15 +29,10 @@ public class QuokkaFormatingModelBuilder implements FormattingModelBuilder {
 				.before(QuokkaTypes.META_INFO).none()
 				.after(QuokkaTypes.GLOBAL_OBJECT).lineBreakOrForceSpace(true, false)
 				.afterInside(QuokkaTypes.IDENTIFIER, QuokkaTypes.GLOBAL_OBJECT).lineBreakOrForceSpace(true, false)
-				.beforeInside(QuokkaTypes.QS_OBJECT, QuokkaTypes.GLOBAL_OBJECT).parentDependentLFSpacing(1, 1, true, 1)
-				.afterInside(QuokkaTypes.QS_OBJECT, QuokkaTypes.GLOBAL_OBJECT).lineBreakOrForceSpace(true, false)
-				.beforeInside(QuokkaTypes.QS_OBJECT, QuokkaTypes.QS_OBJECT).parentDependentLFSpacing(1, 1, true ,1)
-				.afterInside(QuokkaTypes.QS_OBJECT, QuokkaTypes.QS_OBJECT).lineBreakInCode()
 				.after(QuokkaTypes.COLON).spacing(0, 1, 0, false, 0)
-				.before(QuokkaTypes.DEDENT).none()
-				.before(QuokkaTypes.INDENT).none()
-				.after(QuokkaTypes.DEDENT).none()
-				.after(QuokkaTypes.INDENT).none();
+				.around(QuokkaTypes.DEDENT).none()
+				.around(QuokkaTypes.END_LAST).none()
+				.around(QuokkaTypes.INDENT).none();
 	}
 
 	@Nullable

@@ -4,6 +4,7 @@ import com.intellij.formatting.*;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.TokenType;
 import com.intellij.psi.formatter.common.AbstractBlock;
+import com.intellij.psi.tree.IElementType;
 import com.quokka_script.psi.QuokkaTokenType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -39,21 +40,39 @@ public class QuokkaBlock extends AbstractBlock {
 	@Nullable
 	@Override
 	public Spacing getSpacing(@Nullable Block child1, @NotNull Block child2) {
-		if(child1 == null) return Spacing.getReadOnlySpacing();
 		return spacingBuilder.getSpacing(this, child1, child2);
 	}
 
 	@Nullable
 	@Override
 	public Indent getIndent() {
-		if(myNode.getElementType() == QuokkaTypes.GLOBAL_OBJECT) {
-			return Indent.getSpaceIndent(0);
+		if(myNode.getElementType() == QuokkaTypes.META ||
+				myNode.getElementType() == QuokkaTypes.DEFINE ||
+				myNode.getElementType() == QuokkaTypes.DEDENT ||
+				myNode.getElementType() == QuokkaTypes.INDENT ||
+				myNode.getElementType() == QuokkaTypes.COMMENT_BEGIN ||
+				myNode.getElementType() == QuokkaTypes.COMMENT_END ||
+				myNode.getElementType() == QuokkaTypes.END_LAST
+				) {
+			return Indent.getAbsoluteNoneIndent();
 		}
-		else if(myNode.getElementType() == QuokkaTypes.META_INFO) {
-			return Indent.getSpaceIndent(0);
+		else if(myNode.getElementType() == QuokkaTypes.QS_OBJECT){
+			if(myNode.getTreePrev().getElementType() != QuokkaTypes.DEDENT)
+				return Indent.getNormalIndent(true);
+			else
+				return Indent.getNoneIndent();
+		}
+		else if(myNode.getElementType() == QuokkaTypes.METHOD) {
+			return Indent.getNormalIndent(true);
+		}
+		else if(myNode.getElementType() == QuokkaTypes.FUNCTION) {
+			return Indent.getNormalIndent(true);
+		}
+		else if(myNode.getElementType() == QuokkaTypes.META_INFO_BLOCK) {
+			return Indent.getNormalIndent(true);
 		}
 		else {
-			return Indent.getNormalIndent(true);
+			return Indent.getNoneIndent();
 		}
 	}
 

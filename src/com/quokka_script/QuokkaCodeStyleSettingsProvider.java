@@ -44,8 +44,10 @@ public class QuokkaCodeStyleSettingsProvider extends CodeStyleSettingsProvider {
 	}
 
 	private static class QuokkaCodeStyleMainPanel extends TabbedLanguageCodeStylePanel {
-		public QuokkaCodeStyleMainPanel(CodeStyleSettings currentSettings, CodeStyleSettings settings) {
+		private QuokkaCodeStyleMainPanel(CodeStyleSettings currentSettings, CodeStyleSettings settings) {
 			super(QuokkaScript.INSTANCE, currentSettings, settings);
 		}
+
+
 	}
 }

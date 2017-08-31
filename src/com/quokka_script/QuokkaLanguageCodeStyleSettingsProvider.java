@@ -1,9 +1,14 @@
 package com.quokka_script;
 
+import com.intellij.application.options.IndentOptionsEditor;
+import com.intellij.application.options.SmartIndentOptionsEditor;
 import com.intellij.lang.Language;
+import com.intellij.psi.codeStyle.CodeStyleSettings;
 import com.intellij.psi.codeStyle.CodeStyleSettingsCustomizable;
+import com.intellij.psi.codeStyle.CommonCodeStyleSettings;
 import com.intellij.psi.codeStyle.LanguageCodeStyleSettingsProvider;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Created by sonyahon on 16/08/2017.
@@ -15,12 +20,18 @@ public class QuokkaLanguageCodeStyleSettingsProvider extends LanguageCodeStyleSe
 			consumer.showStandardOptions("SPACE_AROUND_ASSIGNMENT_OPERATORS");
 			consumer.renameStandardOption("SPACE_AROUND_ASSIGNMENT_OPERATORS", "Separator");
 		}
-		else if(settingsType == SettingsType.BLANK_LINES_SETTINGS) {
-			consumer.showStandardOptions("KEEP_BLANK_LINES_IN_CODE");
-		}
-		else if(settingsType == SettingsType.INDENT_SETTINGS) {
+	}
 
-		}
+	@Nullable
+	@Override
+	public IndentOptionsEditor getIndentOptionsEditor() {
+		return new SmartIndentOptionsEditor() {
+			@Override
+			public boolean isModified(CodeStyleSettings settings, CommonCodeStyleSettings.IndentOptions options) {
+				QuokkaScript.SETTINGS.setTabSize(options.INDENT_SIZE);
+				return super.isModified(settings, options);
+			}
+		};
 	}
 
 	@NotNull
@@ -32,7 +43,7 @@ public class QuokkaLanguageCodeStyleSettingsProvider extends LanguageCodeStyleSe
 	@Override
 	public String getCodeSample(@NotNull SettingsType settingsType) {
 		return "def Page main\n"+
-						" public Label l1: KPACUBO\n"+
-						"  bottom: #afafaf";
+				"	public Label l1: KPACUBO\n"+
+				" 		bottom: #afafaf";
 	}
 }

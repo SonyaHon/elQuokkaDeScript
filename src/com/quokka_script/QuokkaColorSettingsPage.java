@@ -19,14 +19,12 @@ public class QuokkaColorSettingsPage implements ColorSettingsPage {
     private static final AttributesDescriptor[] DESCRIPTORS = new AttributesDescriptor[] {
             new AttributesDescriptor("Keywords", QuokkaSyntaxHighlighter.KEYWORD),
             new AttributesDescriptor("Strings and Values", QuokkaSyntaxHighlighter.STRING),
-            new AttributesDescriptor("Numbers", QuokkaSyntaxHighlighter.NUMBER),
-            new AttributesDescriptor("Components and properties", QuokkaSyntaxHighlighter.CLASS),
-            new AttributesDescriptor("Separators", QuokkaSyntaxHighlighter.SEPARATOR),
-            new AttributesDescriptor("Braces", QuokkaSyntaxHighlighter.BRACE),
             new AttributesDescriptor("Methods", QuokkaSyntaxHighlighter.METHOD),
             new AttributesDescriptor("Metadata", QuokkaSyntaxHighlighter.META),
+           /* new AttributesDescriptor("Numbers", QuokkaSyntaxHighlighter.NUMBER),
+            new AttributesDescriptor("Separators", QuokkaSyntaxHighlighter.SEPARATOR),
             new AttributesDescriptor("Reactive link", QuokkaSyntaxHighlighter.REACTIVE),
-            new AttributesDescriptor("Identifiers", QuokkaSyntaxHighlighter.IDENTIFIER)
+            new AttributesDescriptor("Identifiers", QuokkaSyntaxHighlighter.IDENTIFIER)*/
     };
 
 

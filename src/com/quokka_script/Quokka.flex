@@ -23,7 +23,8 @@ import java.util.Stack;
 
     Stack<Integer> escapedDedents = new Stack<>();
     Stack<Integer> wrappers = new Stack<Integer>() {{push(0);}};
-    public int tab_size = 4;
+
+    public int tab_size = QuokkaScript.SETTINGS.getTabSize();
     private int current_line_indent = 0;
 
     boolean wasLastTokenComponent = false;
@@ -82,7 +83,6 @@ prop_name = [a-z][a-zA-Z]+:
 <YYINITIAL> {
     " "                         {
                                     yybegin(YYINITIAL); current_line_indent += 1;
-
                                 }
     \t                          {
                                     yybegin(YYINITIAL); current_line_indent = (current_line_indent + tab_size) & ~(tab_size - 1);
@@ -94,6 +94,7 @@ prop_name = [a-z][a-zA-Z]+:
                                             yypushback(1);
                                             yybegin(normal);
                                             wasLastTokenMeta = false;
+                                            return QuokkaTypes.END_LAST;
                                         }
                                         else {
                                             int a = wrappers.peek();
@@ -141,13 +142,14 @@ prop_name = [a-z][a-zA-Z]+:
                                         if(wrappers.peek() == 0 && current_line_indent == 0){
                                             yypushback(1);
                                             yybegin(normal);
+                                            return QuokkaTypes.END_LAST;
                                         }
                                         else {
                                             int a = wrappers.peek();
                                             if(a == current_line_indent) {
                                                 yybegin(normal);
                                                 yypushback(1);
-                                                return TokenType.WHITE_SPACE;
+                                                return QuokkaTypes.END_LAST;
                                             }
                                             else if(a < current_line_indent) {
                                                 wrappers.push(current_line_indent);
@@ -177,11 +179,11 @@ prop_name = [a-z][a-zA-Z]+:
                                                  return QuokkaTypes.DEDENT;
                                              }
                                              else {
-                                                 yybegin(normal);
+                                                 yybegin(YYINITIAL);
                                                  wasLastTokenMethod = false;
                                                  indent_to_close = 0;
                                                  firstTouch = false;
-                                                 return TokenType.WHITE_SPACE;
+                                                 return QuokkaTypes.END_LAST;
                                              }
                                         }
                                         else if(current_line_indent < indent_to_close) {
@@ -217,7 +219,7 @@ prop_name = [a-z][a-zA-Z]+:
                                                 return QuokkaTypes.DEDENT;
                                             }
                                             else {
-                                                yybegin(normal);
+                                                yybegin(YYINITIAL);
                                                 return TokenType.WHITE_SPACE;
                                             }
                                        }
@@ -225,7 +227,7 @@ prop_name = [a-z][a-zA-Z]+:
 
                                             if(wrappers.peek() != 0) {int a = wrappers.pop();
                                                 if(current_line_indent == wrappers.peek()) {
-                                                    yybegin(normal);
+                                                    yybegin(YYINITIAL);
                                                     yypushback(1);
                                                     return QuokkaTypes.DEDENT;
                                                 }
@@ -236,7 +238,7 @@ prop_name = [a-z][a-zA-Z]+:
                                                 }
                                             }
                                             else {
-                                                yybegin(normal);
+                                                yybegin(YYINITIAL);
                                                 yypushback(1);
                                                 return QuokkaTypes.DEDENT;
                                             }
@@ -328,8 +330,7 @@ prop_name = [a-z][a-zA-Z]+:
                                                  yybegin(normal);
                                              return QuokkaTypes.REACTIVE_BRACKET_CLOSED;
                                      }
-     {identifier}                 { yybegin(reactive_link_filling); return QuokkaTypes.IDENTIFIER; }
-     [^]                         { yybegin(reactive_link_filling); return TokenType.BAD_CHARACTER; }
+     [^"}}"\n]                  { yybegin(reactive_link_filling); return QuokkaTypes.IDENTIFIER; }
 }
 
  <string_filling> {

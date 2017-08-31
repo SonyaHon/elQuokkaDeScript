@@ -8,7 +8,7 @@ import com.intellij.lang.Language;
 
 public class QuokkaScript extends Language {
     public static QuokkaScript INSTANCE = new QuokkaScript();
-
+    public static QuokkaCustomSettings SETTINGS = new QuokkaCustomSettings();
     private QuokkaScript() {
         super("Quokka Script");
     }

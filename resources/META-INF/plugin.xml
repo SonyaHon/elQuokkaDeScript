@@ -1,12 +1,11 @@
 <idea-plugin>
-  <id>com.your.company.unique.plugin.id</id>
-  <name>Plugin display name here</name>
-  <version>1.0</version>
-  <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>
+  <id>qsplug</id>
+  <name>Quokka Script</name>
+  <version>0.1</version>
+  <vendor email="none" url="https://track.quokka.pub/issue/CORE-229">YouTrack task</vendor>
 
   <description><![CDATA[
-      Enter short description for your plugin here.<br>
-      <em>most HTML tags may be used</em>
+      pre Alpha version
     ]]></description>
 
   <change-notes><![CDATA[
@@ -18,6 +17,8 @@
   <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
   <idea-version since-build="145.0"/>
 
+  <depends>com.intellij.modules.lang</depends>
+
   <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
        on how to target different products -->
   <!-- uncomment to enable plugin in all products
@@ -28,10 +29,10 @@
     <!-- Add your extensions here -->
     <fileTypeFactory implementation="com.quokka_script.QuokkaFileTypeFactory"/>
     <lang.parserDefinition language="Quokka Script" implementationClass="com.quokka_script.QuokkaParserDefinition"/>
-    <!--  <lang.syntaxHighlighterFactory language="Quokka Script" implementationClass="com.quokka_script.QuokkaSyntaxHighlighterFactory"/>
-     <colorSettingsPage implementation="com.quokka_script.QuokkaColorSettingsPage"/>
+    <lang.syntaxHighlighterFactory language="Quokka Script" implementationClass="com.quokka_script.QuokkaSyntaxHighlighterFactory"/>
+    <colorSettingsPage implementation="com.quokka_script.QuokkaColorSettingsPage"/>
     <codeStyleSettingsProvider implementation="com.quokka_script.QuokkaCodeStyleSettingsProvider"/>
-     <langCodeStyleSettingsProvider implementation="com.quokka_script.QuokkaLanguageCodeStyleSettingsProvider"/> -->
+    <langCodeStyleSettingsProvider implementation="com.quokka_script.QuokkaLanguageCodeStyleSettingsProvider"/>
     <lang.formatter language="Quokka Script" implementationClass="com.quokka_script.QuokkaFormatingModelBuilder" />
 
   </extensions>
