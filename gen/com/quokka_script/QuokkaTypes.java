@@ -12,6 +12,7 @@ public interface QuokkaTypes {
 
   IElementType AR_ITEM = new QuokkaElementType("AR_ITEM");
   IElementType COMMENT = new QuokkaElementType("COMMENT");
+  IElementType COMMENT_BLOCK = new QuokkaElementType("COMMENT_BLOCK");
   IElementType FULL_COMMENT = new QuokkaElementType("FULL_COMMENT");
   IElementType FUNCTION = new QuokkaElementType("FUNCTION");
   IElementType GLOBAL_OBJECT = new QuokkaElementType("GLOBAL_OBJECT");
@@ -19,6 +20,8 @@ public interface QuokkaTypes {
   IElementType JS_ARRAY = new QuokkaElementType("JS_ARRAY");
   IElementType JS_OBJECT = new QuokkaElementType("JS_OBJECT");
   IElementType META_INFO = new QuokkaElementType("META_INFO");
+  IElementType META_INFO_BLOCK = new QuokkaElementType("META_INFO_BLOCK");
+  IElementType META_INN = new QuokkaElementType("META_INN");
   IElementType METHOD = new QuokkaElementType("METHOD");
   IElementType OB_ITEM = new QuokkaElementType("OB_ITEM");
   IElementType OB_NAME = new QuokkaElementType("OB_NAME");
@@ -36,11 +39,13 @@ public interface QuokkaTypes {
   IElementType COMMA = new QuokkaTokenType("COMMA");
   IElementType COMMENT_BEGIN = new QuokkaTokenType("COMMENT_BEGIN");
   IElementType COMMENT_END = new QuokkaTokenType("COMMENT_END");
+  IElementType COMMENT_END_HALF = new QuokkaTokenType("COMMENT_END_HALF");
   IElementType COMMENT_SYMBOL = new QuokkaTokenType("COMMENT_SYMBOL");
   IElementType COMPONENT = new QuokkaTokenType("COMPONENT");
   IElementType DEDENT = new QuokkaTokenType("DEDENT");
   IElementType DEFINE = new QuokkaTokenType("DEFINE");
   IElementType DIGIT = new QuokkaTokenType("DIGIT");
+  IElementType END_LAST = new QuokkaTokenType("END_LAST");
   IElementType FULL_FUNCTION = new QuokkaTokenType("FULL_FUNCTION");
   IElementType FUNC_LINE = new QuokkaTokenType("FUNC_LINE");
   IElementType HEX_DIGIT = new QuokkaTokenType("HEX_DIGIT");
@@ -66,6 +71,9 @@ public interface QuokkaTypes {
       else if (type == COMMENT) {
         return new QuokkaCommentImpl(node);
       }
+      else if (type == COMMENT_BLOCK) {
+        return new QuokkaCommentBlockImpl(node);
+      }
       else if (type == FULL_COMMENT) {
         return new QuokkaFullCommentImpl(node);
       }
@@ -86,6 +94,12 @@ public interface QuokkaTypes {
       }
       else if (type == META_INFO) {
         return new QuokkaMetaInfoImpl(node);
+      }
+      else if (type == META_INFO_BLOCK) {
+        return new QuokkaMetaInfoBlockImpl(node);
+      }
+      else if (type == META_INN) {
+        return new QuokkaMetaInnImpl(node);
       }
       else if (type == METHOD) {
         return new QuokkaMethodImpl(node);

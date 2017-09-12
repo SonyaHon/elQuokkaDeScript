@@ -18,13 +18,16 @@ public class QuokkaColorSettingsPage implements ColorSettingsPage {
 
     private static final AttributesDescriptor[] DESCRIPTORS = new AttributesDescriptor[] {
             new AttributesDescriptor("Keywords", QuokkaSyntaxHighlighter.KEYWORD),
-            new AttributesDescriptor("Strings and Values", QuokkaSyntaxHighlighter.STRING),
+            new AttributesDescriptor("Strings", QuokkaSyntaxHighlighter.STRING),
             new AttributesDescriptor("Methods", QuokkaSyntaxHighlighter.METHOD),
             new AttributesDescriptor("Metadata", QuokkaSyntaxHighlighter.META),
-           /* new AttributesDescriptor("Numbers", QuokkaSyntaxHighlighter.NUMBER),
-            new AttributesDescriptor("Separators", QuokkaSyntaxHighlighter.SEPARATOR),
-            new AttributesDescriptor("Reactive link", QuokkaSyntaxHighlighter.REACTIVE),
-            new AttributesDescriptor("Identifiers", QuokkaSyntaxHighlighter.IDENTIFIER)*/
+            new AttributesDescriptor("Components", QuokkaSyntaxHighlighter.COMPONENT),
+            new AttributesDescriptor("Identifiers", QuokkaSyntaxHighlighter.IDENTIFIER),
+            new AttributesDescriptor("Numbers", QuokkaSyntaxHighlighter.NUMBER),
+            new AttributesDescriptor("Comments", QuokkaSyntaxHighlighter.COMMENT),
+            new AttributesDescriptor("Functions", QuokkaSyntaxHighlighter.FUNCTION),
+            new AttributesDescriptor("Arguments", QuokkaSyntaxHighlighter.ARG),
+            new AttributesDescriptor("Pipes", QuokkaSyntaxHighlighter.REACTIVE)
     };
 
 
@@ -49,7 +52,7 @@ public class QuokkaColorSettingsPage implements ColorSettingsPage {
                 "   background: #333\n"+
                 "   public Label s1: \"Hello World!\" \n" +
                 "   Button b1: {{ s1 }}\n"+
-                "       .click: () -> \n" +
+                "       .click: ( arg1 ) -> \n" +
                 "           console.log(\"Hello World!\")";
     }
 

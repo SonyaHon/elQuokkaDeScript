@@ -4,6 +4,7 @@ import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.TokenType;
 import com.quokka_script.psi.QuokkaTokenType;
+import com.quokka_script.psi.LazyFuncs;
 import java.util.Stack;
 
 %%
@@ -43,13 +44,17 @@ import java.util.Stack;
     int indent_to_close = 0;
 
     boolean argumentsTime = false;
+
+    int indent_to_close_meta = 0;
+    boolean metaFirstTouch = false;
+
 %}
 
 whitespace = [ \t]
 digit = [0-9]+(\.[0-9]*)?
 hex_digit = #[0-9a-fA-F]{1} | #[0-9a-fA-F]{3} | #[0-9a-fA-F]{6}
 identifier = [a-zA-Z][a-zA-Z0-9_]*
-components = [a-zA-Z][a-zA-Z\.]+
+components = [a-zA-Z][a-zA-Z\.]*
 method = \.[a-z]?[a-zA-Z]*
 colon = ":"
 toFuncSeparator = :[ ]*\(([a-zA-Z0-9]+)?\)[ ]*->
@@ -78,6 +83,9 @@ prop_name = [a-z][a-zA-Z]+:
 
 %state indentsEOFeascape
 
+%state indentsCountMeta
+%state indentsCoutnFunc
+
 %%
 
 <YYINITIAL> {
@@ -89,56 +97,7 @@ prop_name = [a-z][a-zA-Z]+:
                                 }
     "/*"                        { yybegin(comment); return QuokkaTypes.COMMENT_BEGIN; }
     [^\n\t ]                    {
-                                    if(wasLastTokenMeta) {
-                                        if(wrappers.peek() == 0 && current_line_indent == 0){
-                                            yypushback(1);
-                                            yybegin(normal);
-                                            wasLastTokenMeta = false;
-                                            return QuokkaTypes.END_LAST;
-                                        }
-                                        else {
-                                            int a = wrappers.peek();
-                                            System.out.println("Last indent size: " + a + ", current line idnent: " + current_line_indent);
-                                            if(a == current_line_indent) {
-                                                yybegin(meta_filling);
-                                                yypushback(1);
-                                                return TokenType.WHITE_SPACE;
-                                            }
-                                            else if(a < current_line_indent) {
-                                                wrappers.push(current_line_indent);
-                                                yypushback(1);
-                                                yybegin(meta_filling);
-                                                return QuokkaTypes.INDENT;
-                                            }
-                                            else if(a > current_line_indent) {
-                                                yypushback(1);
-                                                yybegin(returnDedents);
-                                            }
-                                        }
-                                    }
-                                    else if(wasLastTokenMethod) {
-                                        if(firstTouch) {
-                                            indent_to_close = wrappers.peek();
-                                        }
-                                        int a = wrappers.peek();
 
-                                        if(a > current_line_indent) {
-                                            yypushback(1);
-                                            yybegin(returnDedents);
-                                        }
-                                        else if(a < current_line_indent && firstTouch) {
-                                            yypushback(1);
-                                            wrappers.push(current_line_indent);
-                                            yybegin(method_function_filling_no_brace);
-                                            return QuokkaTypes.INDENT;
-                                        }
-                                        else {
-                                            yypushback(1);
-                                            yybegin(method_function_filling_no_brace);
-                                            return TokenType.WHITE_SPACE;
-                                        }
-                                    }
-                                    else {
                                         if(wrappers.peek() == 0 && current_line_indent == 0){
                                             yypushback(1);
                                             yybegin(normal);
@@ -153,7 +112,7 @@ prop_name = [a-z][a-zA-Z]+:
                                             }
                                             else if(a < current_line_indent) {
                                                 wrappers.push(current_line_indent);
-                                                yypushback(1);
+                                                yypushback(yylength());
                                                 yybegin(normal);
                                                 return QuokkaTypes.INDENT;
                                             }
@@ -162,55 +121,13 @@ prop_name = [a-z][a-zA-Z]+:
                                                 yybegin(returnDedents);
                                             }
                                         }
-                                    }
                                 }
     \n                          { current_line_indent = 0; yybegin(YYINITIAL); return TokenType.WHITE_SPACE; }
 }
 
 <returnDedents> {
     .                           {
-                                   if(wasLastTokenMeta) wasLastTokenMeta = false;
-                                   if(wasLastTokenMethod) {
-                                        if(current_line_indent == 0) {
-                                             yypushback(yylength());
-                                             if(wrappers.peek() != 0) {
-                                                 yybegin(returnDedents);
-                                                 wrappers.pop();
-                                                 return QuokkaTypes.DEDENT;
-                                             }
-                                             else {
-                                                 yybegin(YYINITIAL);
-                                                 wasLastTokenMethod = false;
-                                                 indent_to_close = 0;
-                                                 firstTouch = false;
-                                                 return QuokkaTypes.END_LAST;
-                                             }
-                                        }
-                                        else if(current_line_indent < indent_to_close) {
-                                            yypushback(1);
-                                            wasLastTokenMethod = false;
-                                            indent_to_close = 0;
-                                            firstTouch = false;
-                                            yybegin(YYINITIAL);
-                                            wrappers.pop();
-                                            return QuokkaTypes.DEDENT;
-                                        }
-                                        else if(indent_to_close == current_line_indent) {
-                                            yypushback(1);
-                                            wasLastTokenMethod = false;
-                                            indent_to_close = 0;
-                                            firstTouch = false;
-                                            yybegin(normal);
-                                            wrappers.pop();
-                                            return QuokkaTypes.DEDENT;
-                                        }
-                                        else if(current_line_indent > indent_to_close) {
-                                            yypushback(1);
-                                            yybegin(method_function_filling_no_brace);
-                                            return TokenType.WHITE_SPACE;
-                                        }
-                                   }
-                                   else {
+
                                        if(current_line_indent == 0) {
                                             yypushback(yylength());
                                             if(wrappers.peek() != 0) {
@@ -224,10 +141,10 @@ prop_name = [a-z][a-zA-Z]+:
                                             }
                                        }
                                        else {
-
-                                            if(wrappers.peek() != 0) {int a = wrappers.pop();
+                                            if(wrappers.peek() != 0) {
+                                                int a = wrappers.pop();
                                                 if(current_line_indent == wrappers.peek()) {
-                                                    yybegin(YYINITIAL);
+                                                    yybegin(normal);
                                                     yypushback(1);
                                                     return QuokkaTypes.DEDENT;
                                                 }
@@ -238,13 +155,85 @@ prop_name = [a-z][a-zA-Z]+:
                                                 }
                                             }
                                             else {
-                                                yybegin(YYINITIAL);
+                                                yybegin(normal);
                                                 yypushback(1);
                                                 return QuokkaTypes.DEDENT;
                                             }
                                        }
-                                   }
                                 }
+}
+
+<indentsCountMeta> {
+    " "                         { yybegin(indentsCountMeta); current_line_indent++; return TokenType.WHITE_SPACE; }
+    \t                          { yybegin(indentsCountMeta); current_line_indent = (current_line_indent + tab_size) & ~(tab_size - 1); return TokenType.WHITE_SPACE; }
+    .                           {
+                                    int realOffset = current_line_indent - indent_to_close_meta;
+
+                                    if(realOffset == 0) {
+                                        yybegin(normal);
+                                        yypushback(yylength());
+                                        indent_to_close_meta = 0;
+                                        wasLastTokenMeta = false;
+                                        //wrappers.pop();
+                                        return QuokkaTypes.END_LAST;
+                                    }
+                                    else if (realOffset > 0 && metaFirstTouch == true) {
+                                        metaFirstTouch = false;
+                                        yybegin(meta_filling);
+                                        yypushback(yylength());
+                                        //wrappers.push(realOffset);
+                                        return QuokkaTypes.INDENT;
+                                    }
+                                    else if( realOffset > 0 ) {
+                                        yybegin(meta_filling);
+                                        yypushback(yylength());
+                                        return TokenType.WHITE_SPACE;
+                                    }
+                                    else if (realOffset < 0) {
+                                        wasLastTokenMeta = false;
+                                        indent_to_close_meta = 0;
+                                        yybegin(returnDedents);
+                                        yypushback(1);
+                                        return QuokkaTypes.END_LAST;
+                                    }
+                                }
+    \n                          { current_line_indent = 0; yybegin(indentsCountMeta); return TokenType.WHITE_SPACE; }
+}
+
+<indentsCoutnFunc> {
+    " "                         { yybegin(indentsCoutnFunc); current_line_indent++; return TokenType.WHITE_SPACE; }
+    \t                          { yybegin(indentsCoutnFunc); current_line_indent = (current_line_indent + tab_size) & ~(tab_size - 1); return TokenType.WHITE_SPACE; }
+    .                           {
+                                    int realOffset = current_line_indent - indent_to_close;
+                                    if(realOffset == 0) { // end function
+                                        yybegin(normal);
+                                        firstTouch = false;
+                                        indent_to_close = 0;
+                                        wasLastTokenMethod = false;
+                                        yypushback(yylength());
+                                        return QuokkaTypes.END_LAST;
+                                    }
+                                    else if(realOffset > 0 && firstTouch == true) { // should go in function
+                                        firstTouch = false;
+                                        yybegin(method_function_filling_no_brace);
+                                        yypushback(yylength());
+                                        return QuokkaTypes.INDENT;
+                                    }
+                                    else if(realOffset > 0) { // already indented, just ws should be there
+                                         yybegin(method_function_filling_no_brace);
+                                         yypushback(1);
+                                         return TokenType.WHITE_SPACE;
+                                    }
+                                    else if(realOffset < 0) { // should dedent to some previus pos
+                                        wasLastTokenMethod = false;
+                                        indent_to_close = 0;
+                                        firstTouch = false;
+                                        yypushback(1);
+                                        yybegin(returnDedents);
+                                        return QuokkaTypes.END_LAST;
+                                    }
+                                }
+    \n                          { current_line_indent = 0; yybegin(indentsCoutnFunc); return TokenType.WHITE_SPACE; }
 }
 
 <normal> {
@@ -273,16 +262,20 @@ prop_name = [a-z][a-zA-Z]+:
                                     return QuokkaTypes.COLON;
                                 }
     "/*"                        { yybegin(comment); return QuokkaTypes.COMMENT_BEGIN; }
-    {metadata}                  { wasLastTokenMeta = true; yybegin(normal); return QuokkaTypes.META; }
+    {metadata}                  { metaFirstTouch = true; wasLastTokenMeta = true; yybegin(normal);  indent_to_close_meta = current_line_indent; return QuokkaTypes.META; }
     {identifier}                { if(wasLastTokenComponent) { yybegin(normal); wasLastTokenComponent = false; return QuokkaTypes.IDENTIFIER; } }
-    {method}                    { yybegin(normal); wasLastTokenMethod = true; return QuokkaTypes.METHOD_NAME; }
+    {method}                    { yybegin(normal); firstTouch = true; indent_to_close = current_line_indent; wasLastTokenMethod = true; return QuokkaTypes.METHOD_NAME; }
     [^]                         { yybegin(normal); return TokenType.BAD_CHARACTER; }
 
 }
 
 <comment> {
     "*/"                        { yybegin(normal); return QuokkaTypes.COMMENT_END; }
-    [^]                         { yybegin(comment); return QuokkaTypes.COMMENT_SYMBOL; }
+    \n                          { yybegin(comment); return TokenType.WHITE_SPACE; }
+    {whitespace}                { yybegin(comment); return TokenType.WHITE_SPACE; }
+    {whitespace}+               { yybegin(comment); return TokenType.WHITE_SPACE; }
+    "*"                         { yybegin(comment); return QuokkaTypes.COMMENT_END_HALF; }
+    [^"*/" \n]*                 { yybegin(comment); return QuokkaTypes.COMMENT_SYMBOL; }
 }
 
 <w8ForValue> {
@@ -314,7 +307,7 @@ prop_name = [a-z][a-zA-Z]+:
                                                  yybegin(stringFillingExtra2);
                                              }
                                 }
-    \" | '                      { yypushback(1); yybegin(string_filling); }
+    [\"']{1}                    { yypushback(1); yybegin(string_filling); }
     "["                         { openedBrackets1++; yybegin(json_filling); return QuokkaTypes.BRACKET1O; }
     "{"                         { openedBrackets2++; yybegin(json_filling); return QuokkaTypes.BRACKET2O; }
     [^]                         { yybegin(w8ForValue); return TokenType.BAD_CHARACTER; }
@@ -330,7 +323,7 @@ prop_name = [a-z][a-zA-Z]+:
                                                  yybegin(normal);
                                              return QuokkaTypes.REACTIVE_BRACKET_CLOSED;
                                      }
-     [^"}}"\n]                  { yybegin(reactive_link_filling); return QuokkaTypes.IDENTIFIER; }
+     [^"}}"\n ]*                  { yybegin(reactive_link_filling); return QuokkaTypes.IDENTIFIER; }
 }
 
  <string_filling> {
@@ -390,7 +383,7 @@ prop_name = [a-z][a-zA-Z]+:
     "]"                                         {
                                                     openedBrackets1--;
                                                     if(openedBrackets1 == 0 && openedBrackets2 == 0) {
-                                                        yybegin(normal);
+                                                        yybegin(YYINITIAL);
                                                     }
                                                     else
                                                         yybegin(json_filling);
@@ -399,7 +392,7 @@ prop_name = [a-z][a-zA-Z]+:
     "}"                                         {
                                                     openedBrackets2--;
                                                     if(openedBrackets1 == 0 && openedBrackets2 == 0) {
-                                                        yybegin(normal);
+                                                        yybegin(YYINITIAL);
                                                     }
                                                     else
                                                         yybegin(json_filling);
@@ -410,10 +403,10 @@ prop_name = [a-z][a-zA-Z]+:
  }
 
  <meta_filling> {
-    \n                                          { current_line_indent = 0; yybegin(YYINITIAL); return TokenType.WHITE_SPACE; }
-    {whitespace}                                { yybegin(meta_filling); return TokenType.WHITE_SPACE; }
-    {whitespace}+                               { yybegin(meta_filling); return TokenType.WHITE_SPACE; }
-    [^\n]+                                      { yybegin(meta_filling); return QuokkaTypes.VAL; }
+    \n                                           { current_line_indent = 0; yybegin(indentsCountMeta); return TokenType.WHITE_SPACE; }
+    {whitespace}                                 { yybegin(meta_filling); return TokenType.WHITE_SPACE; }
+    {whitespace}+                                { yybegin(meta_filling); return TokenType.WHITE_SPACE; }
+    [^\n]+                                       { yybegin(meta_filling); return QuokkaTypes.VAL; }
  }
 
  <method_filling> {
@@ -422,14 +415,9 @@ prop_name = [a-z][a-zA-Z]+:
     "("                                         { argumentsTime = true; yybegin(method_filling); return QuokkaTypes.ROUND_BRACE_OPENED; }
     ")"                                         { argumentsTime = false; yybegin(method_filling); return QuokkaTypes.ROUND_BRACE_CLOSED; }
     ","                                         { yybegin(method_filling); return QuokkaTypes.COMMA; }
-    "->"                                        { yybegin(method_filling); return QuokkaTypes.ARROW_RIGHT; }
-    \n                                          { if(indent_to_close == 0) {
-                                                    firstTouch = true;
-                                                  }
-                                                  else {
-                                                    firstTouch = false;
-                                                  }
-                                                  current_line_indent = 0; yybegin(YYINITIAL); return TokenType.WHITE_SPACE; }
+    "->"                                         { yybegin(method_filling); return QuokkaTypes.ARROW_RIGHT; }
+    \n                                          { current_line_indent = 0; yybegin(indentsCoutnFunc); return TokenType.WHITE_SPACE; }
+
     [^\n{]{1}                                   { if(!argumentsTime) { yybegin(method_function_filling_no_brace); yypushback(1); } else{ yybegin(method_filling); return QuokkaTypes.ARGUMENT;}}
     {identifier}                                {
                                                     if(argumentsTime) {
@@ -449,8 +437,10 @@ prop_name = [a-z][a-zA-Z]+:
     "}"                                         {
                                                   openedFuncBrackets-=1;
                                                   if(openedFuncBrackets == 0) {
-                                                     yybegin(normal);
+                                                     yybegin(YYINITIAL);
                                                      wasLastTokenMethod = false;
+                                                     firstTouch = false;
+                                                     indent_to_close = 0;
                                                      return QuokkaTypes.FULL_FUNCTION;
                                                   }
                                                   else {
@@ -461,12 +451,8 @@ prop_name = [a-z][a-zA-Z]+:
  }
 
 <method_function_filling_no_brace> {
-    \n                                          { if(indent_to_close == 0) {
-                                                        firstTouch = true;
-                                                      }
-                                                      else {
-                                                        firstTouch = false;
-                                                      }
-                                                      current_line_indent = 0; yybegin(YYINITIAL); return TokenType.WHITE_SPACE; }
-    [^\n]+                                      { yybegin(method_function_filling_no_brace); return QuokkaTypes.FUNC_LINE; }
+    \n                                           { current_line_indent = 0; yybegin(indentsCoutnFunc); return TokenType.WHITE_SPACE; }
+    {whitespace}                                 { yybegin(method_function_filling_no_brace); return TokenType.WHITE_SPACE; }
+    {whitespace}+                                { yybegin(method_function_filling_no_brace); return TokenType.WHITE_SPACE; }
+    [^\n]+                                       { yybegin(method_function_filling_no_brace); return QuokkaTypes.FUNC_LINE; }
 }

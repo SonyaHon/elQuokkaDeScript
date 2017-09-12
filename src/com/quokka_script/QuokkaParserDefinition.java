@@ -22,7 +22,7 @@ import org.jetbrains.annotations.NotNull;
 public class QuokkaParserDefinition implements ParserDefinition{
     // Tokens here...
     public static final TokenSet WhiteSpaces = TokenSet.create(TokenType.WHITE_SPACE);
-    public static final TokenSet Comment = TokenSet.create(QuokkaTypes.LINE_COMMENT, QuokkaTypes.COMMENT_SYMBOL, QuokkaTypes.COMMENT_BEGIN, QuokkaTypes.COMMENT_END);
+    public static final TokenSet Comment = TokenSet.create(QuokkaTypes.LINE_COMMENT);
 
     public static final TokenSet EMTY_SET = TokenSet.create(QuokkaTypes.DEDENT, QuokkaTypes.INDENT, QuokkaTypes.AR_ITEM,
             QuokkaTypes.COMMENT, QuokkaTypes.FULL_COMMENT, QuokkaTypes.FUNCTION, QuokkaTypes.GLOBAL_OBJECT, QuokkaTypes.JSON_VALUE,

@@ -1,7 +1,7 @@
 <idea-plugin>
   <id>qsplug</id>
   <name>Quokka Script</name>
-  <version>0.1</version>
+  <version>1.0</version>
   <vendor email="none" url="https://track.quokka.pub/issue/CORE-229">YouTrack task</vendor>
 
   <description><![CDATA[
@@ -39,6 +39,14 @@
 
   <actions>
     <!-- Add your actions here -->
+    <action id="template_handler" class="com.quokka_script.TemplateHandler" text="QuokkaScript file"
+            description="Creates a new QuokkaScript file">
+      <add-to-group group-id="NewGroup" anchor="after" relative-to-action="NewCoffeeScriptFile"/>
+    </action>
   </actions>
-
+  <application-components>
+    <component>
+      <implementation-class>com.quokka_script.TemplateCreator</implementation-class>
+    </component>
+  </application-components>
 </idea-plugin>

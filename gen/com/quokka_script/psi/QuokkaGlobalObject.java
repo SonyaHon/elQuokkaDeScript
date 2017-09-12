@@ -11,6 +11,9 @@ public interface QuokkaGlobalObject extends PsiElement {
   List<QuokkaComment> getCommentList();
 
   @NotNull
+  List<QuokkaMetaInn> getMetaInnList();
+
+  @NotNull
   List<QuokkaMethod> getMethodList();
 
   @NotNull

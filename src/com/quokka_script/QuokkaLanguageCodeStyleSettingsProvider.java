@@ -28,7 +28,7 @@ public class QuokkaLanguageCodeStyleSettingsProvider extends LanguageCodeStyleSe
 		return new SmartIndentOptionsEditor() {
 			@Override
 			public boolean isModified(CodeStyleSettings settings, CommonCodeStyleSettings.IndentOptions options) {
-				QuokkaScript.SETTINGS.setTabSize(options.INDENT_SIZE);
+				QuokkaScript.SETTINGS.setTabSize(options.INDENT_SIZE	);
 				return super.isModified(settings, options);
 			}
 		};

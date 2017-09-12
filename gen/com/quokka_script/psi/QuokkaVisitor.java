@@ -11,6 +11,10 @@ public class QuokkaVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
+  public void visitCommentBlock(@NotNull QuokkaCommentBlock o) {
+    visitPsiElement(o);
+  }
+
   public void visitFullComment(@NotNull QuokkaFullComment o) {
     visitPsiElement(o);
   }
@@ -24,6 +28,14 @@ public class QuokkaVisitor extends PsiElementVisitor {
   }
 
   public void visitMetaInfo(@NotNull QuokkaMetaInfo o) {
+    visitPsiElement(o);
+  }
+
+  public void visitMetaInfoBlock(@NotNull QuokkaMetaInfoBlock o) {
+    visitPsiElement(o);
+  }
+
+  public void visitMetaInn(@NotNull QuokkaMetaInn o) {
     visitPsiElement(o);
   }
 

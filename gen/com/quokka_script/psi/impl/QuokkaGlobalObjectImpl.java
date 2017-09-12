@@ -34,6 +34,12 @@ public class QuokkaGlobalObjectImpl extends ASTWrapperPsiElement implements Quok
 
   @Override
   @NotNull
+  public List<QuokkaMetaInn> getMetaInnList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, QuokkaMetaInn.class);
+  }
+
+  @Override
+  @NotNull
   public List<QuokkaMethod> getMethodList() {
     return PsiTreeUtil.getChildrenOfTypeAsList(this, QuokkaMethod.class);
   }

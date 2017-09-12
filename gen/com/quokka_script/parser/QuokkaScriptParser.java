@@ -26,6 +26,9 @@ public class QuokkaScriptParser implements PsiParser, LightPsiParser {
     if (t == COMMENT) {
       r = COMMENT(b, 0);
     }
+    else if (t == COMMENT_BLOCK) {
+      r = COMMENT_BLOCK(b, 0);
+    }
     else if (t == FULL_COMMENT) {
       r = FULL_COMMENT(b, 0);
     }
@@ -37,6 +40,12 @@ public class QuokkaScriptParser implements PsiParser, LightPsiParser {
     }
     else if (t == META_INFO) {
       r = META_INFO(b, 0);
+    }
+    else if (t == META_INFO_BLOCK) {
+      r = META_INFO_BLOCK(b, 0);
+    }
+    else if (t == META_INN) {
+      r = META_INN(b, 0);
     }
     else if (t == METHOD) {
       r = METHOD(b, 0);
@@ -120,41 +129,48 @@ public class QuokkaScriptParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // COMMENT_BEGIN COMMENT_SYMBOL* COMMENT_END close_rule?
+  // (COMMENT_SYMBOL | COMMENT_END_HALF)*
+  public static boolean COMMENT_BLOCK(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "COMMENT_BLOCK")) return false;
+    Marker m = enter_section_(b, l, _NONE_, COMMENT_BLOCK, "<comment block>");
+    int c = current_position_(b);
+    while (true) {
+      if (!COMMENT_BLOCK_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "COMMENT_BLOCK", c)) break;
+      c = current_position_(b);
+    }
+    exit_section_(b, l, m, true, false, null);
+    return true;
+  }
+
+  // COMMENT_SYMBOL | COMMENT_END_HALF
+  private static boolean COMMENT_BLOCK_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "COMMENT_BLOCK_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, COMMENT_SYMBOL);
+    if (!r) r = consumeToken(b, COMMENT_END_HALF);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // COMMENT_BEGIN COMMENT_BLOCK COMMENT_END close_rule
   public static boolean FULL_COMMENT(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "FULL_COMMENT")) return false;
     if (!nextTokenIs(b, COMMENT_BEGIN)) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = consumeToken(b, COMMENT_BEGIN);
-    r = r && FULL_COMMENT_1(b, l + 1);
+    r = r && COMMENT_BLOCK(b, l + 1);
     r = r && consumeToken(b, COMMENT_END);
-    r = r && FULL_COMMENT_3(b, l + 1);
+    r = r && close_rule(b, l + 1);
     exit_section_(b, m, FULL_COMMENT, r);
     return r;
   }
 
-  // COMMENT_SYMBOL*
-  private static boolean FULL_COMMENT_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "FULL_COMMENT_1")) return false;
-    int c = current_position_(b);
-    while (true) {
-      if (!consumeToken(b, COMMENT_SYMBOL)) break;
-      if (!empty_element_parsed_guard_(b, "FULL_COMMENT_1", c)) break;
-      c = current_position_(b);
-    }
-    return true;
-  }
-
-  // close_rule?
-  private static boolean FULL_COMMENT_3(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "FULL_COMMENT_3")) return false;
-    close_rule(b, l + 1);
-    return true;
-  }
-
   /* ********************************************************** */
-  // FULL_FUNCTION | (FUNC_LINE? [INDENT FUNC_LINE+])
+  // FULL_FUNCTION | (FUNC_LINE* [INDENT FUNC_LINE+])
   public static boolean FUNCTION(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "FUNCTION")) return false;
     boolean r;
@@ -165,7 +181,7 @@ public class QuokkaScriptParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // FUNC_LINE? [INDENT FUNC_LINE+]
+  // FUNC_LINE* [INDENT FUNC_LINE+]
   private static boolean FUNCTION_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "FUNCTION_1")) return false;
     boolean r;
@@ -176,10 +192,15 @@ public class QuokkaScriptParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // FUNC_LINE?
+  // FUNC_LINE*
   private static boolean FUNCTION_1_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "FUNCTION_1_0")) return false;
-    consumeToken(b, FUNC_LINE);
+    int c = current_position_(b);
+    while (true) {
+      if (!consumeToken(b, FUNC_LINE)) break;
+      if (!empty_element_parsed_guard_(b, "FUNCTION_1_0", c)) break;
+      c = current_position_(b);
+    }
     return true;
   }
 
@@ -293,7 +314,7 @@ public class QuokkaScriptParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // QS_OBJECT | METHOD | COMMENT
+  // QS_OBJECT | METHOD | COMMENT | META_INN
   static boolean INN(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "INN")) return false;
     boolean r;
@@ -301,12 +322,13 @@ public class QuokkaScriptParser implements PsiParser, LightPsiParser {
     r = QS_OBJECT(b, l + 1);
     if (!r) r = METHOD(b, l + 1);
     if (!r) r = COMMENT(b, l + 1);
+    if (!r) r = META_INN(b, l + 1);
     exit_section_(b, m, null, r);
     return r;
   }
 
   /* ********************************************************** */
-  // META COLON VAL? [INDENT VAL*] close_rule?
+  // META COLON VAL* [INDENT META_INFO_BLOCK] close_rule
   public static boolean META_INFO(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "META_INFO")) return false;
     if (!nextTokenIs(b, META)) return false;
@@ -315,57 +337,106 @@ public class QuokkaScriptParser implements PsiParser, LightPsiParser {
     r = consumeTokens(b, 0, META, COLON);
     r = r && META_INFO_2(b, l + 1);
     r = r && META_INFO_3(b, l + 1);
-    r = r && META_INFO_4(b, l + 1);
+    r = r && close_rule(b, l + 1);
     exit_section_(b, m, META_INFO, r);
     return r;
   }
 
-  // VAL?
+  // VAL*
   private static boolean META_INFO_2(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "META_INFO_2")) return false;
-    consumeToken(b, VAL);
+    int c = current_position_(b);
+    while (true) {
+      if (!consumeToken(b, VAL)) break;
+      if (!empty_element_parsed_guard_(b, "META_INFO_2", c)) break;
+      c = current_position_(b);
+    }
     return true;
   }
 
-  // [INDENT VAL*]
+  // [INDENT META_INFO_BLOCK]
   private static boolean META_INFO_3(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "META_INFO_3")) return false;
     META_INFO_3_0(b, l + 1);
     return true;
   }
 
-  // INDENT VAL*
+  // INDENT META_INFO_BLOCK
   private static boolean META_INFO_3_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "META_INFO_3_0")) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = consumeToken(b, INDENT);
-    r = r && META_INFO_3_0_1(b, l + 1);
+    r = r && META_INFO_BLOCK(b, l + 1);
     exit_section_(b, m, null, r);
     return r;
   }
 
+  /* ********************************************************** */
+  // VAL+
+  public static boolean META_INFO_BLOCK(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "META_INFO_BLOCK")) return false;
+    if (!nextTokenIs(b, VAL)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, VAL);
+    int c = current_position_(b);
+    while (r) {
+      if (!consumeToken(b, VAL)) break;
+      if (!empty_element_parsed_guard_(b, "META_INFO_BLOCK", c)) break;
+      c = current_position_(b);
+    }
+    exit_section_(b, m, META_INFO_BLOCK, r);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // META COLON VAL* [INDENT META_INFO_BLOCK] close_rule
+  public static boolean META_INN(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "META_INN")) return false;
+    if (!nextTokenIs(b, META)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeTokens(b, 0, META, COLON);
+    r = r && META_INN_2(b, l + 1);
+    r = r && META_INN_3(b, l + 1);
+    r = r && close_rule(b, l + 1);
+    exit_section_(b, m, META_INN, r);
+    return r;
+  }
+
   // VAL*
-  private static boolean META_INFO_3_0_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "META_INFO_3_0_1")) return false;
+  private static boolean META_INN_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "META_INN_2")) return false;
     int c = current_position_(b);
     while (true) {
       if (!consumeToken(b, VAL)) break;
-      if (!empty_element_parsed_guard_(b, "META_INFO_3_0_1", c)) break;
+      if (!empty_element_parsed_guard_(b, "META_INN_2", c)) break;
       c = current_position_(b);
     }
     return true;
   }
 
-  // close_rule?
-  private static boolean META_INFO_4(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "META_INFO_4")) return false;
-    close_rule(b, l + 1);
+  // [INDENT META_INFO_BLOCK]
+  private static boolean META_INN_3(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "META_INN_3")) return false;
+    META_INN_3_0(b, l + 1);
     return true;
   }
 
+  // INDENT META_INFO_BLOCK
+  private static boolean META_INN_3_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "META_INN_3_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, INDENT);
+    r = r && META_INFO_BLOCK(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
   /* ********************************************************** */
-  // METHOD_NAME COLON ROUND_BRACE_OPENED (ARGUMENT (COMMA ARGUMENT)*)? ROUND_BRACE_CLOSED ARROW_RIGHT FUNCTION close_rule?
+  // METHOD_NAME COLON ROUND_BRACE_OPENED (ARGUMENT (COMMA ARGUMENT)*)? ROUND_BRACE_CLOSED ARROW_RIGHT FUNCTION close_rule
   public static boolean METHOD(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "METHOD")) return false;
     if (!nextTokenIs(b, METHOD_NAME)) return false;
@@ -375,7 +446,7 @@ public class QuokkaScriptParser implements PsiParser, LightPsiParser {
     r = r && METHOD_3(b, l + 1);
     r = r && consumeTokens(b, 0, ROUND_BRACE_CLOSED, ARROW_RIGHT);
     r = r && FUNCTION(b, l + 1);
-    r = r && METHOD_7(b, l + 1);
+    r = r && close_rule(b, l + 1);
     exit_section_(b, m, METHOD, r);
     return r;
   }
@@ -420,15 +491,8 @@ public class QuokkaScriptParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // close_rule?
-  private static boolean METHOD_7(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "METHOD_7")) return false;
-    close_rule(b, l + 1);
-    return true;
-  }
-
   /* ********************************************************** */
-  // KEYWORD? COMPONENT [IDENTIFIER] [COLON VALUE?] [INDENT INN*] close_rule?
+  // KEYWORD? COMPONENT [IDENTIFIER] [COLON VALUE?] [INDENT INN*] close_rule
   public static boolean QS_OBJECT(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "QS_OBJECT")) return false;
     if (!nextTokenIs(b, "<qs object>", COMPONENT, KEYWORD)) return false;
@@ -439,7 +503,7 @@ public class QuokkaScriptParser implements PsiParser, LightPsiParser {
     r = r && QS_OBJECT_2(b, l + 1);
     r = r && QS_OBJECT_3(b, l + 1);
     r = r && QS_OBJECT_4(b, l + 1);
-    r = r && QS_OBJECT_5(b, l + 1);
+    r = r && close_rule(b, l + 1);
     exit_section_(b, l, m, r, false, null);
     return r;
   }
@@ -513,13 +577,6 @@ public class QuokkaScriptParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // close_rule?
-  private static boolean QS_OBJECT_5(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "QS_OBJECT_5")) return false;
-    close_rule(b, l + 1);
-    return true;
-  }
-
   /* ********************************************************** */
   // REACTIVE_BRACKET_OPENED IDENTIFIER* REACTIVE_BRACKET_CLOSED
   public static boolean REACTIVE_LINK(PsiBuilder b, int l) {
@@ -574,13 +631,14 @@ public class QuokkaScriptParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // DEDENT | <<eof>>
+  // DEDENT | <<eof>> | END_LAST
   static boolean close_rule(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "close_rule")) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = consumeToken(b, DEDENT);
     if (!r) r = eof(b, l + 1);
+    if (!r) r = consumeToken(b, END_LAST);
     exit_section_(b, m, null, r);
     return r;
   }
@@ -832,7 +890,7 @@ public class QuokkaScriptParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // (GLOBAL_OBJECT | META_INFO | COMMENT)*
+  // (GLOBAL_OBJECT | META_INFO | COMMENT | END_LAST)*
   static boolean rootFile(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "rootFile")) return false;
     int c = current_position_(b);
@@ -844,7 +902,7 @@ public class QuokkaScriptParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // GLOBAL_OBJECT | META_INFO | COMMENT
+  // GLOBAL_OBJECT | META_INFO | COMMENT | END_LAST
   private static boolean rootFile_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "rootFile_0")) return false;
     boolean r;
@@ -852,6 +910,7 @@ public class QuokkaScriptParser implements PsiParser, LightPsiParser {
     r = GLOBAL_OBJECT(b, l + 1);
     if (!r) r = META_INFO(b, l + 1);
     if (!r) r = COMMENT(b, l + 1);
+    if (!r) r = consumeToken(b, END_LAST);
     exit_section_(b, m, null, r);
     return r;
   }

@@ -16,6 +16,20 @@ public class QuokkaTokenType extends IElementType {
 
     @Override
     public String toString() {
-        return "QuokkaTokenType." + super.toString();
+        String debugName = super.toString();
+        switch (debugName) {
+            case "INDENT":
+                return "inner object";
+            case "DEDENT":
+                return "";
+            case "END_LAST":
+                return "";
+            case "DEFINE":
+                return "def";
+            case "META":
+                return "metadata";
+            default:
+                return debugName;
+        }
     }
 }
